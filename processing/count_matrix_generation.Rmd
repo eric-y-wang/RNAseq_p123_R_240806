@@ -95,8 +95,8 @@ paste0(sum(rowSums(mat > 0) == 33)," genes have counts > 0 in at all samples")
 # remove genes that are not expressed in any sample
 mat <- mat[rowSums(mat > 0) > 0,]
 
-write_csv(mat, "C:/Users/Eric/My Drive/Lab/datasets/EYW/RNAseq_p123_240806/processed_data/RNAseq_p123_counts.csv")
-write_csv(metadata, "C:/Users/Eric/My Drive/Lab/datasets/EYW/RNAseq_p123_240806/processed_data/processed_metadata.csv")
+write.csv(mat, "C:/Users/Eric/My Drive/Lab/datasets/EYW/RNAseq_p123_240806/processed_data/RNAseq_p123_counts.csv", row.names = T)
+write_csv(sampleQC, "C:/Users/Eric/My Drive/Lab/datasets/EYW/RNAseq_p123_240806/processed_data/processed_metadata.csv")
 ```
 
 
