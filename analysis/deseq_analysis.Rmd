@@ -76,17 +76,45 @@ dds <- dds[keep,]
 
 #### Assess sample similarity
 
+First, we'll perform PCA analysis to look at the overall similarity between samples.
+
 ```{r}
 # perform VST normalization
 # essentially normalizes to library size while stabilizing variance for lowly expressed genes
 ddsNorm <- vst(dds)
 ```
 
-
-```{r}
-DESeq2::plotPCA(ddsNorm, intgroup = "treatment", ntop=500) + theme(aspect.ratio = 1) +
+```{r, fig.height=10, fig.width=12}
+p1 <- DESeq2::plotPCA(ddsNorm, intgroup = "treatment", ntop=500) + theme(aspect.ratio = 1) +
   scale_color_brewer(palette = "Paired") +
-  ggtitle("Pseudobulk by Gene Target")
+  ggtitle("PC1 PC2 by treatment")
+p2 <- DESeq2::plotPCA(ddsNorm, intgroup = "treatment", ntop=500, pcsToUse = 3:4) + theme(aspect.ratio = 1) +
+  scale_color_brewer(palette = "Paired") +
+  ggtitle("PC3 PC4 by treatment")
+p3 <- DESeq2::plotPCA(ddsNorm, intgroup = "replicate", ntop=500) + theme(aspect.ratio = 1) +
+  scale_color_brewer(palette = "Paired") +
+  ggtitle("PC1 PC2 by mouse")
+p4 <- DESeq2::plotPCA(ddsNorm, intgroup = "replicate", ntop=500, pcsToUse = 3:4) + theme(aspect.ratio = 1) +
+  scale_color_brewer(palette = "Paired") +
+  ggtitle("PC3 PC4 by mouse")
+
+(p1+p2)/(p3+p4)
+```
+```{r, fig.height=10, fig.width=12}
+p1 <- DESeq2::plotPCA(ddsNorm[,-grep("^p123_1e",colnames(ddsNorm))], intgroup = "treatment", ntop=500) + theme(aspect.ratio = 1) +
+  scale_color_brewer(palette = "Paired") +
+  ggtitle("PC1 PC2 by treatment")
+p2 <- DESeq2::plotPCA(ddsNorm[,-grep("^p123_1e",colnames(ddsNorm))], intgroup = "treatment", ntop=500, pcsToUse = 3:4) + theme(aspect.ratio = 1) +
+  scale_color_brewer(palette = "Paired") +
+  ggtitle("PC3 PC4 by treatment")
+p3 <- DESeq2::plotPCA(ddsNorm[,-grep("^p123_1e",colnames(ddsNorm))], intgroup = "replicate", ntop=500) + theme(aspect.ratio = 1) +
+  scale_color_brewer(palette = "Paired") +
+  ggtitle("PC1 PC2 by mouse")
+p4 <- DESeq2::plotPCA(ddsNorm[,-grep("^p123_1e",colnames(ddsNorm))], intgroup = "replicate", ntop=500, pcsToUse = 3:4) + theme(aspect.ratio = 1) +
+  scale_color_brewer(palette = "Paired") +
+  ggtitle("PC3 PC4 by mouse")
+
+(p1+p2)/(p3+p4)
 ```
 
 #### Variable Genes
@@ -283,7 +311,16 @@ p3 <- ggplot(comparisonTibIl12, aes(x = log2FoldChange_ref, y = log2FoldChange, 
 plot_grid(p1,p2,p3,ncol = 2)
 ```
 
+```{r}
+write_csv(comparisonTibIl4, "analysis_outs/deg_IL4.csv")
+write_csv(comparisonTibIl6, "analysis_outs/deg_IL6.csv")
+write_csv(comparisonTibIl12, "analysis_outs/deg_IL12.csv")
+write_csv(resLFCvirus, "analysis_outs/deg_p123-1e11_untreated.csv")
+write_csv(resLFCvirus2, "analysis_outs/deg_p123-1e11_1e10.csv")
+```
 
+
+INSERT UPSET PLOTS
 
 
 
