@@ -313,6 +313,83 @@ p3 <- ggplot(comparisonTibIl12, aes(x = log2FoldChange_ref, y = log2FoldChange, 
 plot_grid(p1,p2,p3,ncol = 2)
 ```
 
+```{r, fig.height=6, fig.width=6}
+library(ggrepel)
+
+resLFCvirus %>%
+  filter(padj < 0.1) %>%
+  ggplot(aes(x = log2FoldChange, y = -log10(padj))) +
+    geom_point() +
+    geom_text_repel(aes(label = gene),show.legend = FALSE) +
+    ggtitle("2e11 LP/mL vs untreated padj < 0.1") +
+    guides(colour = guide_legend(override.aes = list(size=1))) +
+    theme(aspect.ratio = 1)
+
+nrow(resLFCvirus2 %>% filter(padj < 0.1))
+```
+
+There are no significant DEGs in 2e11 vs 2e10 comparison
+
+```{r, fig.height=18, fig.width=12}
+Il4shared <- filter(comparisonTibIl4, significance == "both")$gene
+Il6shared <- filter(comparisonTibIl6, significance == "both")$gene
+Il12shared <- filter(comparisonTibIl12, significance == "both")$gene
+
+p1 <- resLFCIl4virus %>%
+  filter(padj < 0.1) %>%
+  mutate(shared = ifelse(gene %in% Il4shared, "yes","no")) %>%
+  ggplot(aes(x = log2FoldChange, y = -log10(padj), color = shared)) +
+    geom_point() +
+    scale_color_brewer(palette = "Dark2") +
+    ggtitle("IL4 virus padj < 0.1") +
+    theme(aspect.ratio = 1)
+p2 <- resLFCIl4recomb %>%
+  filter(padj < 0.1) %>%
+  mutate(shared = ifelse(gene %in% Il4shared, "yes","no")) %>%
+  ggplot(aes(x = log2FoldChange, y = -log10(padj), color = shared)) +
+    geom_point() +
+    scale_color_brewer(palette = "Dark2") +
+    ggtitle("IL4 recombinant padj < 0.1") +
+    theme(aspect.ratio = 1)
+
+p3 <- resLFCIl6virus %>%
+  filter(padj < 0.1) %>%
+  mutate(shared = ifelse(gene %in% Il6shared, "yes","no")) %>%
+  ggplot(aes(x = log2FoldChange, y = -log10(padj), color = shared)) +
+    geom_point() +
+    scale_color_brewer(palette = "Dark2") +
+    ggtitle("IL6 virus padj < 0.1") +
+    theme(aspect.ratio = 1)
+p4 <- resLFCIl6recomb %>%
+  filter(padj < 0.1) %>%
+  mutate(shared = ifelse(gene %in% Il6shared, "yes","no")) %>%
+  ggplot(aes(x = log2FoldChange, y = -log10(padj), color = shared)) +
+    geom_point() +
+    scale_color_brewer(palette = "Dark2") +
+    ggtitle("IL6 recombinant padj < 0.1") +
+    theme(aspect.ratio = 1)
+
+p5 <- resLFCIl12virus %>%
+  filter(padj < 0.1) %>%
+  mutate(shared = ifelse(gene %in% Il12shared, "yes","no")) %>%
+  ggplot(aes(x = log2FoldChange, y = -log10(padj), color = shared)) +
+    geom_point() +
+    scale_color_brewer(palette = "Dark2") +
+    ggtitle("IL12 virus padj < 0.1") +
+    theme(aspect.ratio = 1)
+p6 <- resLFCIl12recomb %>%
+  filter(padj < 0.1) %>%
+  mutate(shared = ifelse(gene %in% Il12shared, "yes","no")) %>%
+  ggplot(aes(x = log2FoldChange, y = -log10(padj), color = shared)) +
+    geom_point() +
+    scale_color_brewer(palette = "Dark2") +
+    ggtitle("IL12 recombinant padj < 0.1") +
+    theme(aspect.ratio = 1)
+
+plot_grid(p1,p2,p3,p4,p5,p6,ncol = 2)
+```
+
+
 ```{r}
 write_csv(comparisonTibIl4, "analysis_outs/deg_IL4.csv")
 write_csv(comparisonTibIl6, "analysis_outs/deg_IL6.csv")
