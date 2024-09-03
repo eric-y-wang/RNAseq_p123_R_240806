@@ -28,12 +28,12 @@ theme_set(theme_Publication())
 
 ### [Import Data]{.underline}
 
-Create counts matrix
+Create counts matrix using *UMI collapsed data*
 ```{r}
 matrix_dir <- "C:/Users/Eric/My Drive/Lab/datasets/EYW/RNAseq_p123_240806/star_outputSolo.out/Gene/raw/"
 
 # import UMI count matrix
-mat <- readMM("C:/Users/Eric/My Drive/Lab/datasets/EYW/RNAseq_p123_240806/star_outputSolo.out/Gene/raw/umiDedup-NoDedup.mtx") %>%
+mat <- readMM("C:/Users/Eric/My Drive/Lab/datasets/EYW/RNAseq_p123_240806/star_outputSolo.out/Gene/raw/umiDedup-1MM_Directional.mtx") %>%
   as.matrix() %>%
   as.data.frame()
 
