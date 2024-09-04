@@ -377,12 +377,12 @@ p4 <- DESeq2::plotPCA(ddsNorm[,-grep("^p123_1e",colnames(ddsNorm))], intgroup = 
 library(RColorBrewer)
 
 # find top variable genes
-topVarGenes <- head(order(rowVars(assay(ddsNorm)), decreasing = TRUE), 60)
+topVarGenes <- head(order(rowVars(assay(ddsNorm)), decreasing = TRUE), 80)
 
 # extract VST count matrix
 mat  <- assay(ddsNorm)[topVarGenes, ]
 # z-score VST counts
-mat  <- t(scale(t(mat), center = T, scale = T))
+mat  <- t(scale(t(mat), center = T, scale = F))
 anno <- as.data.frame(colData(ddsNorm)[, c("treatment","replicate")])
 
 # replace rownames with gene names
@@ -398,7 +398,7 @@ rownames(mat) <- rownames$gene
 pheatmap(mat, annotation_col = anno,
           annotation_colors = list(treatment = setNames(brewer.pal(10, "Paired"),levels(anno$treatment)),
                                    replicate = setNames(brewer.pal(3,"Dark2"),unique(anno$replicate))),
-         main = "Z-score VST normalized counts")
+         main = "Centered VST normalized counts")
 ```
 
 ![](deseq_analysis_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
@@ -410,7 +410,7 @@ is consistently not upregulated in one mouse across all treatments.
 # extract VST count matrix
 mat  <- assay(ddsNorm)[topVarGenes, ]
 # z-score VST counts
-mat  <- t(scale(t(mat), center = T, scale = T))
+mat  <- t(scale(t(mat), center = T, scale = F))
 anno <- as.data.frame(colData(ddsNorm)[, c("treatment","replicate")])
 # remove p123 titration samples
 mat <- mat[,grep("^p123_1e",colnames(mat),invert = T)]
@@ -429,7 +429,7 @@ rownames(mat) <- rownames$gene
 pheatmap(mat, annotation_col = anno,
           annotation_colors = list(treatment = setNames(brewer.pal(10, "Paired"),levels(anno$treatment)),
                                    replicate = setNames(brewer.pal(3,"Dark2"),unique(anno$replicate))),
-         main = "Z-score VST normalized counts")
+         main = "Centered VST normalized counts")
 ```
 
 ![](deseq_analysis_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
