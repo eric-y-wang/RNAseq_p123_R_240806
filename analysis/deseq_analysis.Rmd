@@ -29,12 +29,12 @@ theme_set(theme_Publication())
 ### [Import Data]{.underline}
 
 ```{r}
-data <- read.csv("C:/Users/Eric/My Drive/Lab/datasets/EYW/RNAseq_p123_240806/processed_data/RNAseq_p123_counts.csv", row.names = "X")
+data <- read.csv("C:/Users/Eric/Documents/datasets/EYW/RNAseq_p123_240806/processed_data/RNAseq_p123_counts.csv", row.names = "X")
 
-metadata <- read_csv("C:/Users/Eric/My Drive/Lab/datasets/EYW/RNAseq_p123_240806/processed_data/processed_metadata.csv")
+metadata <- read_csv("C:/Users/Eric/Documents/datasets/EYW/RNAseq_p123_240806/processed_data/processed_metadata.csv")
 
 # import feature names
-featureNames <- read_tsv("C:/Users/Eric/My Drive/Lab/datasets/EYW/RNAseq_p123_240806/star_outputSolo.out/Gene/raw/features.tsv", col_names = F)
+featureNames <- read_tsv("C:/Users/Eric/Documents/datasets/EYW/RNAseq_p123_240806/star_outputSolo.out/Gene/raw/features.tsv", col_names = F)
 colnames(featureNames) <- c("ensembl_ID","gene","category")
 featureNames <- select(featureNames, -category)
 ```
@@ -74,6 +74,22 @@ smallestGroupSize <- 3
 keep <- rowSums(counts(dds) >= 10) >= smallestGroupSize
 dds <- dds[keep,]
 ```
+
+#### Export normalized counts
+
+```{r}
+dds <- estimateSizeFactors(dds)
+```
+
+```{r}
+normCounts <- counts(dds, normalized=T) %>%
+  as_tibble(rownames = "ensembl_ID") %>%
+  left_join(featureNames)
+
+write_csv(normCounts, "analysis_outs/counts_norm_DEseq2.csv")
+```
+
+
 
 #### Assess sample similarity
 
