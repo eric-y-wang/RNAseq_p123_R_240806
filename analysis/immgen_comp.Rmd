@@ -1,0 +1,162 @@
+---
+title: "Immgen Comparison"
+author: "Eric Y. Wang"
+date: "`r Sys.Date()`"
+output:
+  github_document:
+    toc: true
+    html_preview: false
+  html_notebook:
+    toc: true
+    toc_float: true
+---
+
+```{r setup}
+library(tidyverse)
+library(ggplot2)
+library(cowplot)
+library(patchwork)
+library(DESeq2)
+library(ComplexHeatmap)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+source("functions/plotting_fxns.R")
+theme_set(theme_Publication())
+```
+
+### [Import Data]{.underline}
+
+```{r}
+# import DEGs from this analysis
+# only include reference (recombinant protein) columns
+actIL4 <- read_csv("analysis_outs/deg_IL4.csv") %>%
+  dplyr::select(matches("_ref"))
+colnames(actIL4) <- gsub("_ref","",colnames(actIL4))
+actIL6 <- read_csv("analysis_outs/deg_IL6.csv") %>%
+  dplyr::select(matches("_ref"))
+colnames(actIL6) <- gsub("_ref","",colnames(actIL6))
+
+# import immgen DEGs
+immIL4 <- read_csv("external/immgen_il4_T4n_deg.csv") %>%
+  mutate(log2FoldChange = log2(FC))
+immIL6 <- read_csv("external/immgen_il6_T4n_deg.csv") %>%
+  mutate(log2FoldChange = log2(FC))
+```
+
+### [Compare]{.underline}
+
+```{r, fig.height=7, fig.width=14}
+# Merge the reference tibble with the comparison data
+comparisonTibIl4 <- actIL4 %>%
+  inner_join(immIL4, by = "gene", suffix = c("", "_ref")) %>%
+  mutate(
+    significance = case_when(
+      padj_ref < 0.1 & padj < 0.1 ~ "both",
+      padj_ref < 0.1 ~ "immgen specific",
+      padj < 0.1 ~ "dataset specific",
+      TRUE ~ "none"
+    )) %>%
+  mutate(significance = factor(significance, c("none","immgen specific","dataset specific","both"))
+  ) %>%
+  filter(significance != "none")
+
+# Plotting
+p1 <- ggplot(comparisonTibIl4, aes(x = log2FoldChange_ref, y = log2FoldChange, color = significance)) +
+  geom_point() +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed") +
+  theme(aspect.ratio = 1) +
+  scale_color_brewer(palette = "Dark2") +
+  xlim(-5,7)+
+  ylim(-5,7)+
+  labs(
+    title = "IL4 Comparison",
+    x = "log2FC (immgen)",
+    y = "log2FC (dataset)"
+  )
+
+# Merge the reference tibble with the comparison data
+comparisonTibIl6 <- actIL6 %>%
+  inner_join(immIL6, by = "gene", suffix = c("", "_ref")) %>%
+  mutate(
+    significance = case_when(
+      padj_ref < 0.1 & padj < 0.1 ~ "both",
+      padj_ref < 0.1 ~ "immgen specific",
+      padj < 0.1 ~ "dataset specific",
+      TRUE ~ "none"
+    )) %>%
+  mutate(significance = factor(significance, c("none","immgen specific","dataset specific","both"))
+  ) %>%
+  filter(significance != "none")
+
+# Plotting
+p2 <- ggplot(comparisonTibIl6, aes(x = log2FoldChange_ref, y = log2FoldChange, color = significance)) +
+  geom_point() +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed") +
+  theme(aspect.ratio = 1) +
+  scale_color_brewer(palette = "Dark2") +
+  xlim(-5,7)+
+  ylim(-5,7)+
+  labs(
+    title = "IL6 Comparison",
+    x = "log2FC (immgen)",
+    y = "log2FC (dataset)"
+  )
+
+
+p1+p2
+```
+
+```{r, fig.height=5, fig.width=10}
+Il4shared <- filter(comparisonTibIl4, significance == "both")$gene
+Il6shared <- filter(comparisonTibIl6, significance == "both")$gene
+
+p1 <- actIL4 %>%
+  filter(padj < 0.1) %>%
+  mutate(shared = ifelse(gene %in% Il4shared, "yes","no")) %>%
+  ggplot(aes(x = log2FoldChange, y = -log10(padj), color = shared)) +
+    geom_point() +
+    scale_color_brewer(palette = "Dark2") +
+    ggtitle("IL4 recombinant padj < 0.1\nactivated CD4") +
+    theme(aspect.ratio = 1)
+
+p2 <- actIL6 %>%
+  filter(padj < 0.1) %>%
+  mutate(shared = ifelse(gene %in% Il6shared, "yes","no")) %>%
+  ggplot(aes(x = log2FoldChange, y = -log10(padj), color = shared)) +
+    geom_point() +
+    scale_color_brewer(palette = "Dark2") +
+    ggtitle("IL6 recombinant padj < 0.1\nactivated CD4") +
+    theme(aspect.ratio = 1)
+
+p1+p2
+```
+
+```{r}
+actIL4 %>%
+  filter(padj < 0.1) %>%
+  mutate(shared = ifelse(gene %in% Il4shared, "yes","no")) %>%
+  group_by(shared) %>%
+  summarise(n = n()) %>%
+  mutate(freq = n/sum(n))
+
+actIL6 %>%
+  filter(padj < 0.1) %>%
+  mutate(shared = ifelse(gene %in% Il6shared, "yes","no")) %>%
+  group_by(shared) %>%
+  summarise(n = n()) %>%
+  mutate(freq = n/sum(n))
+```
+
+
+
+
+
+
+
+
+
+
+
+
