@@ -86,7 +86,7 @@ normCounts <- counts(dds, normalized=T) %>%
   as_tibble(rownames = "ensembl_ID") %>%
   left_join(featureNames)
 
-write_csv(normCounts, "analysis_outs/counts_norm_DEseq2.csv")
+# write_csv(normCounts, "analysis_outs/counts_norm_DEseq2.csv")
 ```
 
 
@@ -162,6 +162,30 @@ pheatmap(mat, annotation_col = anno,
 There is biological variability between different mice. For example, Il2 is consistently not upregulated in one mouse across all treatments.
 
 ```{r, fig.height=12, fig.width=8}
+# extract VST count matrix
+mat  <- assay(ddsNorm)[topVarGenes, ]
+# z-score VST counts
+mat  <- t(scale(t(mat), center = T, scale = F))
+anno <- as.data.frame(colData(ddsNorm)[, c("treatment","replicate")])
+# remove p123 titration samples
+mat <- mat[,grep("^p123_1e",colnames(mat),invert = T)]
+anno <- anno[grep("^p123_1e",rownames(anno),invert = T),]
+
+# replace rownames with gene names
+rownames <- tibble(ensembl_ID = rownames(mat)) %>%
+  left_join(featureNames)
+rownames(mat) <- rownames$gene
+
+pheatmap(mat, annotation_col = anno,
+          annotation_colors = list(treatment = setNames(brewer.pal(10, "Paired"),levels(anno$treatment)),
+                                   replicate = setNames(brewer.pal(3,"Dark2"),unique(anno$replicate))),
+         main = "Centered VST normalized counts")
+```
+
+```{r, fig.height=8, fig.width=6}
+# find top variable genes
+topVarGenes <- head(order(rowVars(assay(ddsNorm)), decreasing = TRUE), 30)
+
 # extract VST count matrix
 mat  <- assay(ddsNorm)[topVarGenes, ]
 # z-score VST counts
